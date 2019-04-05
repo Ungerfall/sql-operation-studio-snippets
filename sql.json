@@ -6,10 +6,13 @@
 	// Example:
 	"select-from-source": {
 		"prefix": "ssf",
-		"body": [
-			"SELECT * FROM ${1:table};"
-		],
+		"body": "SELECT * FROM ${1:table};",
 		"description": "select all columns from source (table, view etc.)"
+	},
+	"select-count": {
+		"prefix": "scf",
+		"body": "SELECT COUNT(*) FROM ${1:table};",
+		"description": "select count (with NULLs) from source (table, view etc.)"
 	},
 	"select-top-100": {
 		"prefix": "st100",
@@ -53,5 +56,47 @@
 			"\tFETCH NEXT FROM $1 INTO $4;",
 			"END;"
 		]
+	},
+	"sobos-create-stored-procedure": {
+		"prefix": "sobos-sp",
+		"body": [
+			"--------------------------------------------------------------------------------",
+			"-- $1.$2",
+			"--------------------------------------------------------------------------------",
+			"IF NOT EXISTS(",
+				"SELECT 1",
+				"FROM INFORMATION_SCHEMA.ROUTINES",
+				"WHERE ROUTINE_NAME = '$2'",
+					"AND ROUTINE_TYPE = 'PROCEDURE')",
+			"BEGIN",
+				"PRINT 'Creating procedure $1.$2';",
+				"EXEC ('CREATE PROCEDURE [$1].[$2] AS RAISERROR(''Not implemented yet.'', 16, 3);');",
+			"END;",
+			"",
+			"PRINT 'Altering of procedure $1.$2';",
+			"GO",
+			"",
+			"SET QUOTED_IDENTIFIER ON;",
+			"GO",
+			"",
+			"SET ANSI_NULLS ON;",
+			"GO",
+			"",
+			"--------------------------------------------------------------------------------",
+			"-- $1.$2",
+			"--------------------------------------------------------------------------------",
+			"ALTER PROCEDURE [$1].[$2]",
+				"${3}",
+			"AS",
+			"BEGIN",
+				"SET ANSI_WARINING ON;",
+				"SET NOCOUNT ON;",
+				"",
+				"${0}",
+			"END;",
+			"GO",
+			""
+		],
+		"description": ""
 	}
 }
